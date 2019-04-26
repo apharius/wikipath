@@ -84,7 +84,24 @@ def distance_heuristic(link,stop):
         #print("No known distance between {0} and {1}! Please calculate in the future.".format(link,stop))
         with open("Suggestions {0}.txt".format(stop),"a+") as suggestions:
             suggestions.write(link + "\n")
-        return jaccard_distance(link,stop)
+        try:
+            estimate_json = open("estimate_cache.json","r")
+            estimate_cache = json.load(estimate_json)
+            estimate_json.close()
+            return estimate_cache[link][stop]
+        except:
+            estimate = jaccard_distance(link,stop)
+            estimate_cache = {}
+            with open("estimate_cache.json","r") as estimate_json:
+                estimate_cache = json.load(estimate_json)
+            if link in estimate_cache:
+                estimate_cache[link][stop] = estimate
+            else:
+                estimate_cache[link] = {}
+                estimate_cache[link][stop] = estimate
+            with open("estimate_cache.json","w") as estimate_json:
+                json.dump(estimate_cache,estimate_json)
+            return estimate
 
 def get_lowest(eligble,fscore):
     lowest_value = 10000
@@ -197,7 +214,6 @@ def unwrap_path(parents,start,stop):
     global known_distances
     json_file = open("known_distances.json","r")
     known_distances = json.load(json_file)
-    json_file.close()
     for i in range(len(path)):
         dist = 0
         if path[i] not in known_distances:
@@ -206,6 +222,7 @@ def unwrap_path(parents,start,stop):
             if path[j] not in known_distances[path[i]]:
                 known_distances[path[i]][path[j]] = dist
                 dist += 1
+    json_file.close()
     with open("known_distances.json","w+") as outfile:
         json.dump(known_distances,outfile)
 def get_page_links(article_name):
