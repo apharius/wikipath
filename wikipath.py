@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 article_data = {}
 known_distances = {}
 years_allowed = False
+stop_words = []
 def main():
 
     if len(sys.argv) >= 2:
@@ -127,25 +128,28 @@ def links_in_common(first,second):
     return max(0.5,total)
 
 def jaccard_distance(first,second):
-
-    #first_links = get_page_links(first)["parse"]["links"]
-    #second_links = get_page_links(second)["parse"]["links"]
     
-    first_text = get_page_text(first)
-    second_text = get_page_text(second)
-    #first_set = set([x["*"] for x in first_links])   
-    #second_set = set([x["*"] for x in second_links]) 
- 
-    first_set = set(first_text.split(' '))
-    second_set = set(second_text.split(' '))
+    first_set = get_word_set(first)
+    second_set = get_word_set(second)
 
     union = first_set.union(second_set)
     intersection = first_set.intersection(second_set)
-
-    
+ 
     distance = (len(union) - len(intersection))/len(union) 
     #print("Avstånd mellan {0} och {1}: {2}".format(first,second,distance))
     return distance
+
+def get_word_set(article):
+    global stop_words
+    if len(stop_words) == 0:
+        json_file = open("stopwords-sv.json","r")
+        stop_words = json.load(json_file)
+        json_file.close()
+    
+    article_text = get_page_text(article)
+    article_words = article_text.split(' ')
+    article_nostop = [x for x in article_words if x not in stop_words]
+    return set(article_nostop)
 
 def find_path_bfs(start,stop):
     to_visit = []
