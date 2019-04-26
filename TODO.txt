@@ -1,0 +1,9 @@
+TODO:
+	 ASAP:
+		- Remove stop words when comparing article texts
+		- Save estimates to file to get rid of redundant calculations
+	Future:
+		- Try to make sure text doesn't contain garbage.
+		- Fast mode/optimal path mode switch
+		- Graph generation (not hard, just not something I wanna do right now)
+		- Better path printing (see above)
